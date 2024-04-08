@@ -1,0 +1,126 @@
+---
+- name: Connectivity Check
+  hosts: all
+  tasks:
+    - name: Pinging all hosts
+      ping:
+
+- name: Prerequisites for InfluxDB
+  hosts: influxdb
+  become: true
+  tasks:
+    - name: Add repository of InfluxDB
+      ansible.builtin.yum_repository:
+        name: influxdb
+        description: InfluxDB Repository - RHEL \$releasever
+        baseurl: https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
+        gpgkey: https://repos.influxdata.com/influxdata-archive_compat.key
+        enabled: true
+
+    - name: Install the latest version of InfluxDB
+      ansible.builtin.yum:
+        name:
+          - influxdb
+        state: latest
+
+    - name: Restart service influxdb
+      ansible.builtin.service:
+        name: influxdb
+        state: started
+
+- name: Prerequisites for Grafana
+  hosts: grafana
+  become: true
+  tasks:
+    - name: Add repository of Grafana
+      ansible.builtin.yum_repository:
+        name: grafana
+        description: Grafana Repository - RHEL \$releasever
+        baseurl: https://rpm.grafana.com
+        gpgkey: https://rpm.grafana.com/gpg.key
+        enabled: true
+
+    - name: Install the latest version of Grafana
+      ansible.builtin.yum:
+        name: grafana
+        state: latest
+
+    - name: Copy the grafana datasource configuration file
+      ansible.builtin.copy:
+        src: "files/datasource.yaml"
+        dest: "/etc/grafana/provisioning/datasources/datasource.yaml"
+        mode: 0644
+
+    - name: Copy the grafana dashboard configuration file 
+      ansible.builtin.copy:
+        src: "files/dashboard.yaml"
+        dest: "/etc/grafana/provisioning/dashboards/dashboard.yaml"
+        mode: 0644
+
+    - name: ensures /etc/grafana/dashboards/ dir exists
+      file: 
+        path: "/etc/grafana/dashboards/"
+        state: directory
+
+    - name: Copy the dashboard file
+      ansible.builtin.copy:
+        src: "files/dashboard.json"
+        dest: "/etc/grafana/dashboards/dashboard.json"
+        mode: 0644
+
+    - name: Restart service grafana-server   
+      ansible.builtin.service:
+        name: grafana-server
+        state: restarted
+        enabled: yes
+
+- name: Prerequisites for Telegraf
+  hosts: telegraf
+  become: true
+  tasks:
+    - name: Add repository of Telegraf
+      ansible.builtin.yum_repository:
+        name: telegraf
+        description: Telegraf Repository - RHEL \$releasever
+        baseurl: https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
+        gpgkey: https://repos.influxdata.com/influxdata-archive_compat.key
+        enabled: true
+
+    - name: Install the latest version of Telegraf
+      ansible.builtin.yum:
+        name: telegraf
+        state: latest
+
+    - name: Copy the telegraf configuration file
+      ansible.builtin.copy:
+        src: "files/telegraf.conf"
+        dest: "/etc/telegraf/telegraf.conf"
+        mode: 0644 
+        force: yes
+
+    - name: Restart service telegraf
+      ansible.builtin.service:
+        name: telegraf
+        state: restarted
+        enabled: yes
+  
+- name: Dependencies for MQTT
+  hosts: broker_mqtt
+  become: true
+  tasks: 
+    - name: install mosquitto
+      apt:
+        name: mosquitto
+        update_cache: yes
+        state: present
+
+    - name: cpy config Broker
+      copy:
+        src: broker.conf
+        dest: /etc/mosquitto/mosquitto.conf
+
+    - name: reload service
+      service:
+        name: mosquitto
+        state: restarted
+        enabled: yes
