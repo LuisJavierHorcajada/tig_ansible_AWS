@@ -13,9 +13,13 @@ El Objetivo del trabajo es desplegar la arquitectura TIG en diversos nodos virtu
 -  **InfluxDB**: Es la base de datos, se despliega en una VM en local.
 -  **Grafana**: Es una herramienta que se conecta a InfluxDB y permite visualizar los datos, se despliega en una VM en local.
 
+La arquitectura es la siguiente:
+
+![Imagen](/arquitectura.png?raw=true "Arquitectura")
+
 ## Estructura
 
-Se va a describir la estructura de los archivos:
+Se va a describir la estructura del proyecto:
 
 ### Files
 
