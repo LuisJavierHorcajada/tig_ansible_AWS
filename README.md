@@ -1,4 +1,8 @@
-# Guía de Funcionamiento
+# IT2 Planificación y Gestión de Infraestructuras TIC
+
+## Autores
+
+-   Luis Javier Horcajada Torres - [LuisJavier.Horcajada\@alu.uclm.es](mailto:LuisJavier.Horcajada@alu.uclm.es)
 
 ## Objetivo del proyecto
 
